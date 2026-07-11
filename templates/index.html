@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pose RPS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">TEACHABLE MACHINE + PYTHON</p>
+      <h1>Rock Paper Scissors</h1>
+      <p>Hold a pose steady until the countdown completes.</p>
+    </header>
+
+    <section class="setup card">
+      <label for="model-url">Model location</label>
+      <div class="url-row">
+        <input id="model-url" value="/static/model/" placeholder="https://teachablemachine.withgoogle.com/models/xxxxx/">
+        <button id="start">Start camera</button>
+      </div>
+      <small>Use your shared model URL, or put exported files in <code>static/model/</code>.</small>
+      <p id="status" role="status">Waiting to start.</p>
+    </section>
+
+    <section class="arena">
+      <div class="camera card">
+        <div id="webcam"></div>
+        <div class="detected">
+          <span>Detected</span>
+          <strong id="detected-move">—</strong>
+          <span id="confidence">0%</span>
+        </div>
+        <div class="meter"><div id="meter-fill"></div></div>
+      </div>
+
+      <div class="result card">
+        <div class="score">
+          <div><strong id="player-score">0</strong><span>You</span></div>
+          <b>:</b>
+          <div><strong id="computer-score">0</strong><span>Computer</span></div>
+        </div>
+        <div class="versus">
+          <div><span>You played</span><strong id="player-move">?</strong></div>
+          <b>VS</b>
+          <div><span>Computer</span><strong id="computer-move">?</strong></div>
+        </div>
+        <h2 id="outcome">Show your move!</h2>
+        <p>Draws: <span id="draws">0</span> · Round: <span id="round">0</span></p>
+        <button id="reset" class="secondary">Reset score</button>
+      </div>
+    </section>
+
+    <section class="card history-card">
+      <h2>Recent rounds</h2>
+      <ol id="history"><li>No rounds yet.</li></ol>
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

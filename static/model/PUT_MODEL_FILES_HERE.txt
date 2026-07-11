@@ -1,0 +1,10 @@
+Put all files from the downloaded Teachable Machine model in this folder.
+
+At minimum this normally includes:
+- model.json
+- metadata.json
+- weights.bin
+
+Keep the filenames unchanged. You can instead paste a published Teachable
+Machine model URL into the web page, such as:
+https://teachablemachine.withgoogle.com/models/ABCDE1234/
