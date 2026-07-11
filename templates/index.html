@@ -10,9 +10,13 @@
 </head>
 <body>
   <div class="brand-logos" aria-label="Partner logos">
-    <img class="hku-logo" src="{{ url_for('logos', filename='HKU-Aca-Logo-White-RGB.webp') }}" alt="The University of Hong Kong">
+    <div class="logo-tile is-tile">
+      <img src="{{ url_for('logos', filename='4C-IS-logo.webp') }}" alt="School of Innovation">
+    </div>
     <span aria-hidden="true"></span>
-    <img class="is-logo" src="{{ url_for('logos', filename='4C-IS-logo.webp') }}" alt="4C Information Security">
+    <div class="logo-tile hku-tile">
+      <img src="{{ url_for('logos', filename='HKU-Aca-Logo-White-RGB.webp') }}" alt="HKU Academy for the Talented">
+    </div>
   </div>
   <main>
     <header>
