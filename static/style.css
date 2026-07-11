@@ -16,6 +16,10 @@ button:disabled { opacity: .5; cursor: wait; }
 .secondary { color: var(--ink); background: #2b2b32; }
 small, #status { color: var(--muted); }
 #status { margin-bottom: 0; }
+.diagnostics { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+.diagnostics summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+#debug-log { min-height: 90px; max-height: 230px; overflow: auto; white-space: pre-wrap; color: #c9f7c9; background: #08080a; border-radius: 10px; padding: 12px; font-size: .78rem; line-height: 1.45; }
+#copy-log { padding: 8px 12px; }
 .arena { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .camera { overflow: hidden; padding: 16px; }
 #webcam { display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #08080a; }

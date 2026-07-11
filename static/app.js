@@ -11,6 +11,27 @@ let running = false;
 let candidate = null;
 let candidateSince = 0;
 let cooldownUntil = 0;
+let lastPredictionLog = 0;
+
+function errorMessage(error) {
+  if (error instanceof Error) return `${error.name}: ${error.message}`;
+  return String(error);
+}
+
+function log(message, details) {
+  const time = new Date().toLocaleTimeString();
+  const suffix = details === undefined ? "" : ` | ${typeof details === "string" ? details : JSON.stringify(details)}`;
+  const line = `[${time}] ${message}${suffix}`;
+  console.log(`[RPS] ${message}`, details ?? "");
+  const output = $("debug-log");
+  if (output) {
+    output.textContent += `${line}\n`;
+    output.scrollTop = output.scrollHeight;
+  }
+}
+
+window.addEventListener("error", (event) => log("Browser error", `${event.message} (${event.filename}:${event.lineno})`));
+window.addEventListener("unhandledrejection", (event) => log("Unhandled promise rejection", errorMessage(event.reason)));
 
 function normalizeModelBase(value) {
   const trimmed = value.trim();
@@ -28,47 +49,76 @@ function classToMove(className) {
 async function start() {
   if (running) return;
   $("start").disabled = true;
-  $("status").textContent = "Loading pose model…";
+  $("status").textContent = "Loading image model…";
   try {
     const base = normalizeModelBase($("model-url").value);
-    model = await tmPose.load(`${base}model.json`, `${base}metadata.json`);
-    webcam = new tmPose.Webcam(420, 420, true);
+    log("Start requested", { modelBase: base, secureContext: window.isSecureContext });
+    if (!window.tf) throw new Error("TensorFlow.js did not load. Check the CDN connection or an ad blocker.");
+    if (!window.tmImage) throw new Error("Teachable Machine Image library did not load. Check the CDN connection or an ad blocker.");
+    log("Libraries ready", { tfjs: tf.version.tfjs, tmImage: typeof tmImage.load });
+
+    log("Downloading model.json and metadata.json");
+    model = await tmImage.load(`${base}model.json`, `${base}metadata.json`);
+    log("Model loaded", { classes: model.getClassLabels(), totalClasses: model.getTotalClasses() });
+
+    webcam = new tmImage.Webcam(420, 420, true);
+    log("Requesting camera permission");
     await webcam.setup();
+    log("Camera permission granted");
     await webcam.play();
+    log("Webcam stream started", { width: webcam.canvas.width, height: webcam.canvas.height });
     $("webcam").replaceChildren(webcam.canvas);
     running = true;
     $("status").textContent = "Camera ready. Hold up rock, paper, or scissors.";
     requestAnimationFrame(loop);
   } catch (error) {
     console.error(error);
-    $("status").textContent = `Could not start: ${error.message}`;
+    const message = errorMessage(error);
+    log("Start failed", message);
+    $("status").textContent = `Could not start: ${message}`;
     $("start").disabled = false;
   }
 }
 
 async function loop(now) {
   if (!running) return;
-  webcam.update();
-  const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-  const predictions = await model.predict(posenetOutput);
-  const best = predictions.reduce((a, b) => a.probability > b.probability ? a : b);
-  const move = classToMove(best.className);
+  try {
+    webcam.update();
+    const predictions = await model.predict(webcam.canvas);
+    const best = predictions.reduce((a, b) => a.probability > b.probability ? a : b);
+    const move = classToMove(best.className);
 
-  $("detected-move").textContent = move ? `${EMOJI[move]} ${move}` : best.className;
-  $("confidence").textContent = `${Math.round(best.probability * 100)}%`;
-
-  if (move && best.probability >= CONFIDENCE_THRESHOLD && now >= cooldownUntil) {
-    if (candidate !== move) {
-      candidate = move;
-      candidateSince = now;
+    if (now - lastPredictionLog >= 3000) {
+      log("Prediction running", predictions.map(({ className, probability }) => ({
+        className,
+        confidence: `${Math.round(probability * 100)}%`,
+      })));
+      lastPredictionLog = now;
     }
-    const progress = Math.min(1, (now - candidateSince) / REQUIRED_STABLE_MS);
-    $("meter-fill").style.width = `${progress * 100}%`;
-    if (progress >= 1) await playRound(move, now);
-  } else {
-    candidate = null;
-    candidateSince = 0;
-    $("meter-fill").style.width = "0%";
+
+    $("detected-move").textContent = move ? `${EMOJI[move]} ${move}` : best.className;
+    $("confidence").textContent = `${Math.round(best.probability * 100)}%`;
+
+    if (move && best.probability >= CONFIDENCE_THRESHOLD && now >= cooldownUntil) {
+      if (candidate !== move) {
+        candidate = move;
+        candidateSince = now;
+      }
+      const progress = Math.min(1, (now - candidateSince) / REQUIRED_STABLE_MS);
+      $("meter-fill").style.width = `${progress * 100}%`;
+      if (progress >= 1) await playRound(move, now);
+    } else {
+      candidate = null;
+      candidateSince = 0;
+      $("meter-fill").style.width = "0%";
+    }
+  } catch (error) {
+    running = false;
+    const message = errorMessage(error);
+    log("Prediction loop failed", message);
+    $("status").textContent = `Prediction failed: ${message}`;
+    $("start").disabled = false;
+    return;
   }
   requestAnimationFrame(loop);
 }
@@ -116,4 +166,18 @@ async function reset() {
 
 $("start").addEventListener("click", start);
 $("reset").addEventListener("click", reset);
-fetch("/api/state").then(r => r.json()).then(render);
+$("copy-log").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText($("debug-log").textContent);
+    log("Diagnostic log copied");
+  } catch (error) {
+    log("Could not copy log", errorMessage(error));
+  }
+});
+
+log("Page script initialized", {
+  secureContext: window.isSecureContext,
+  tfLoaded: Boolean(window.tf),
+  tmImageLoaded: Boolean(window.tmImage),
+});
+fetch("/api/state").then(r => r.json()).then(render).catch(error => log("State request failed", errorMessage(error)));

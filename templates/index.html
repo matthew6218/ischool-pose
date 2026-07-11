@@ -3,27 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pose RPS</title>
+  <title>Image RPS</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 </head>
 <body>
   <main>
     <header>
       <p class="eyebrow">TEACHABLE MACHINE + PYTHON</p>
       <h1>Rock Paper Scissors</h1>
-      <p>Hold a pose steady until the countdown completes.</p>
+      <p>Show your hand sign to the camera until the countdown completes.</p>
     </header>
 
     <section class="setup card">
       <label for="model-url">Model location</label>
       <div class="url-row">
-        <input id="model-url" value="/static/model/" placeholder="https://teachablemachine.withgoogle.com/models/xxxxx/">
+        <input id="model-url" value="https://teachablemachine.withgoogle.com/models/UYVP_XDRN/" placeholder="https://teachablemachine.withgoogle.com/models/xxxxx/">
         <button id="start">Start camera</button>
       </div>
-      <small>Use your shared model URL, or put exported files in <code>static/model/</code>.</small>
+      <small>Use a shared Teachable Machine image-model URL, or put exported files in <code>static/model/</code>.</small>
       <p id="status" role="status">Waiting to start.</p>
+      <details class="diagnostics" open>
+        <summary>Diagnostic log</summary>
+        <pre id="debug-log" aria-live="polite"></pre>
+        <button id="copy-log" class="secondary" type="button">Copy log</button>
+      </details>
     </section>
 
     <section class="arena">
@@ -59,6 +64,6 @@
       <ol id="history"><li>No rounds yet.</li></ol>
     </section>
   </main>
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}?v=3"></script>
 </body>
 </html>
