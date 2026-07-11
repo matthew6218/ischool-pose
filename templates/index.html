@@ -9,6 +9,11 @@
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 </head>
 <body>
+  <div class="brand-logos" aria-label="Partner logos">
+    <img class="hku-logo" src="{{ url_for('logos', filename='HKU-Aca-Logo-White-RGB.webp') }}" alt="The University of Hong Kong">
+    <span aria-hidden="true"></span>
+    <img class="is-logo" src="{{ url_for('logos', filename='4C-IS-logo.webp') }}" alt="4C Information Security">
+  </div>
   <main>
     <header>
       <p class="eyebrow">TEACHABLE MACHINE + PYTHON</p>

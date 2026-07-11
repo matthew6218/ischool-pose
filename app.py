@@ -3,7 +3,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 
 
 MOVES = ("rock", "paper", "scissors")
@@ -66,6 +66,13 @@ game = Game()
 @app.get("/")
 def index():
     return render_template("index.html")
+
+
+@app.get("/logos/<path:filename>")
+def logos(filename: str):
+    response = send_from_directory("logos", filename)
+    response.mimetype = "image/webp"
+    return response
 
 
 @app.get("/api/state")
