@@ -13,7 +13,7 @@ Teachable Machine TensorFlow.js image model.
    exported files into `static/model/`.
 
 The app is preconfigured to use
-`https://teachablemachine.withgoogle.com/models/UYVP_XDRN/`.
+`https://teachablemachine.withgoogle.com/models/OhrlarC1J/`.
 
 ## Run
 
